@@ -1,4 +1,4 @@
-﻿namespace LearningSupportSystemAPI.Configs
+﻿namespace LearningSupportSystemAPI.Settings
 {
     public class EduConfig
     {

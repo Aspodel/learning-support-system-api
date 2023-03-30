@@ -12,7 +12,7 @@ namespace LearningSupportSystemAPI.Core.Entities
         public DateTime DateOfBirth { get; set; }
         public string? Address { get; set; }
         public string? Avatar { get; set; }
-        public bool? IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
         public int? DepartmentId { get; set; }
         public Department? Department { get; set; }
