@@ -77,6 +77,18 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 #endregion
 
+#region [Add CORS]
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPermission", policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("http://localhost:3000", "https://blog-hub.netlify.app")
+            .AllowCredentials();
+    });
+});
+#endregion
 
 var app = builder.Build();
 
@@ -88,6 +100,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("ClientPermission"); // Use the CORS policy
 
 app.UseAuthorization();
 

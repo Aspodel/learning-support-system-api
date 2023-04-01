@@ -47,7 +47,7 @@ namespace LearningSupportSystemAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DepartmentDTO dto, CancellationToken cancellationToken = default)
         {
-            var discussion = _mapper.Map<Department>(dto);
+            var discussion = _mapper.Map<Discussion>(dto);
             _discussionRepository.Add(discussion);
             await _discussionRepository.SaveChangesAsync(cancellationToken);
 
