@@ -1,8 +1,10 @@
 using LearningSupportSystemAPI.Contract;
 using LearningSupportSystemAPI.Core.Database;
+using LearningSupportSystemAPI.Core.Entities;
 using LearningSupportSystemAPI.Repository;
 using LearningSupportSystemAPI.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -88,6 +90,23 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+#endregion
+
+#region [Add Identity]
+builder.Services.AddIdentity<User, Role>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 1;
+
+    options.User.RequireUniqueEmail = false;
+    options.SignIn.RequireConfirmedEmail = false;
+})
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddUserManager<UserManager>()
+                .AddDefaultTokenProviders();
 #endregion
 
 var app = builder.Build();

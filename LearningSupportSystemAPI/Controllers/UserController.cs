@@ -6,6 +6,7 @@ using LearningSupportSystemAPI.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace LearningSupportSystemAPI.Controllers
 {
@@ -16,13 +17,15 @@ namespace LearningSupportSystemAPI.Controllers
         #region [Fields]
         private readonly UserManager _userManager;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserController> _logger;
         #endregion
 
         #region [Ctor]
-        public UserController(UserManager userManager, IMapper mapper)
+        public UserController(UserManager userManager, IMapper mapper, ILogger<UserController> logger)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _logger = logger;
         }
         #endregion
 
@@ -34,10 +37,10 @@ namespace LearningSupportSystemAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<UserDTO>>(users));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        [HttpGet("{idCard}")]
+        public async Task<IActionResult> Get(string idCard)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdCardAsync(idCard);
             if (user is null)
                 return NotFound();
 
@@ -47,11 +50,27 @@ namespace LearningSupportSystemAPI.Controllers
 
         #region [POST]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateUserDTO dto)
         {
             var user = _mapper.Map<User>(dto);
-            _userManager.Add(user);
-            await _userManager.SaveChangesAsync(cancellationToken);
+
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Unable to create user {username}. Result details: {result}", dto.Username, string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+                return BadRequest(result);
+            }
+
+            // Send email for account confirmation
+            //await SendEmailConfirmation(user);
+
+            // Add user to specified roles
+            var addToRolesResult = await _userManager.AddToRolesAsync(user, dto.Roles);
+            if (!addToRolesResult.Succeeded)
+            {
+                _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", dto.Username, string.Join(", ", dto.Roles), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+                return BadRequest("Fail to add role");
+            }
 
             return Ok(_mapper.Map<UserDTO>(user));
         }
@@ -59,30 +78,42 @@ namespace LearningSupportSystemAPI.Controllers
 
         #region [PUT]
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] UserDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update([FromBody] UserDTO dto)
         {
-            var user = await _userManager.FindByIdAsync(dto.Id);
-            if (user is null)
+            var user = await _userManager.FindByIdCardAsync(dto.IdCard);
+            if (user is null || user.IsDeleted)
                 return NotFound();
 
             _mapper.Map(dto, user);
-            _userManager.Update(user);
-            await _userManager.SaveChangesAsync(cancellationToken);
+            await _userManager.UpdateAsync(user);
+
+            ICollection<string> requestRoles = dto.Roles;
+            ICollection<string> originalRoles = await _userManager.GetRolesAsync(user);
+
+            // Delete Roles
+            ICollection<string> deleteRoles = originalRoles.Except(requestRoles).ToList();
+            if (deleteRoles.Count > 0)
+                await _userManager.RemoveFromRolesAsync(user, deleteRoles);
+
+            // Add Roles
+            ICollection<string> newRoles = requestRoles.Except(originalRoles).ToList();
+            if (newRoles.Count > 0)
+                await _userManager.AddToRolesAsync(user, newRoles);
 
             return NoContent();
         }
         #endregion
 
         #region [DELETE]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken = default)
+        [HttpDelete("{idCard}")]
+        public async Task<IActionResult> Delete(string idCard)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdCardAsync(idCard);
             if (user is null)
                 return NotFound();
 
-            _userManager.Delete(user);
-            await _userManager.SaveChangesAsync(cancellationToken);
+            user.IsDeleted = true;
+            await _userManager.UpdateAsync(user);
 
             return NoContent();
         }
