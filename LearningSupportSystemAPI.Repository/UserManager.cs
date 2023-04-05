@@ -40,5 +40,10 @@ namespace LearningSupportSystemAPI.Repository
             => Users
                 .Where(u => !u.IsDeleted)
                 .WhereIf(predicate != null, predicate!);
+
+        public IQueryable<User> FindAllStudents(Expression<Func<User, bool>>? predicate = null)
+            => Users
+                .OfType<Student>()
+                .WhereIf(predicate != null, predicate!);
     }
 }

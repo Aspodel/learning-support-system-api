@@ -2,6 +2,7 @@ using LearningSupportSystemAPI.Contract;
 using LearningSupportSystemAPI.Core.Database;
 using LearningSupportSystemAPI.Core.Entities;
 using LearningSupportSystemAPI.Repository;
+using LearningSupportSystemAPI.Services;
 using LearningSupportSystemAPI.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +51,8 @@ builder.Services.AddTransient<IMessageRepository, MessageRepository>();
 builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
 builder.Services.AddTransient<IRoomRepository, RoomRepository>();
 builder.Services.AddTransient<ISemesterRepository, SemesterRepository>();
+
+builder.Services.AddTransient<IGenerateIdService, GenerateIdService>();
 #endregion
 
 #region [Add Authentication]
