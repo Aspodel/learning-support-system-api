@@ -4,15 +4,15 @@ namespace LearningSupportSystemAPI.Core.Entities
 {
     public class Student : User
     {
-        public DateTime? StartYear { get; set; } = DateTime.UtcNow;
+        public int? StartYear { get; set; } = DateTime.UtcNow.Year;
 
-        public int MajorId { get; set; }
+        public int? MajorId { get; set; }
         public Major? Major { get; set; }
 
-        public string SupervisorId { get; set; } = string.Empty;
+        public string? SupervisorId { get; set; } = string.Empty;
         public Lecturer? Supervisor { get; set; }
 
-        public virtual ICollection<StudentClass> RegisteredClasses { get; set; } = new HashSet<StudentClass>();
-        public virtual ICollection<Grade> Grades { get; set; } = new HashSet<Grade>();
+        public ICollection<StudentClass> RegisteredClasses { get; set; } = new HashSet<StudentClass>();
+        public ICollection<Grade>? Grades { get; set; }
     }
 }

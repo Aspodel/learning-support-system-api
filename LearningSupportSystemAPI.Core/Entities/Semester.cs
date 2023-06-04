@@ -5,15 +5,16 @@
         public SemesterType Type { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public string AcademicYear { get; set; } = string.Empty;
         public int? ExchangeRate { get; set; }
 
-        public virtual ICollection<Class> Classes { get; set; } = new HashSet<Class>();
+        public ICollection<Class>? Classes { get; set; }
     }
 
     public enum SemesterType
     {
-        First,
-        Second,
+        Fall,
+        Spring,
         Summer
     }
 }

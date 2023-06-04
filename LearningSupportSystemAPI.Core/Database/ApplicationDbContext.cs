@@ -105,7 +105,7 @@ namespace LearningSupportSystemAPI.Core.Database
             {
                 entity.HasOne(g => g.GradeColumn).WithMany(gc => gc.Grades).OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(g => g.Student).WithMany(s => s.Grades).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(g => g.Student).WithMany(s => s.Grades).OnDelete(DeleteBehavior.Restrict);
             });
 
 
@@ -156,8 +156,7 @@ namespace LearningSupportSystemAPI.Core.Database
 
                 entity.HasOne(sc => sc.Student)
                     .WithMany(s => s.RegisteredClasses)
-                    .HasForeignKey(sc => sc.StudentId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .HasForeignKey(sc => sc.StudentId);
 
                 entity.HasOne(sc => sc.Class)
                     .WithMany(c => c.Students)

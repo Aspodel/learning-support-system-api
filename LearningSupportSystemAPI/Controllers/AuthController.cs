@@ -63,6 +63,8 @@ namespace LearningSupportSystemAPI.Controllers
                     tokenType = tokenConfig.TokenType,
                     accessToken = token,
                     refresh_token,
+                    user.Id,
+                    user.IdCard,
                     user.Email,
                     roles
                 }

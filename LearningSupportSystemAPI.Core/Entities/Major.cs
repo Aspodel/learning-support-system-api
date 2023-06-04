@@ -10,7 +10,7 @@
         public int DepartmentId { get; set; }
         public Department? Department { get; set; }
 
-        public virtual ICollection<Course> CourseProgram { get; set; } = new HashSet<Course>();
-        public virtual ICollection<Student> Students { get; set; } = new HashSet<Student>();
+        public ICollection<Course> CourseProgram { get; set; } = new HashSet<Course>();
+        public ICollection<Student> Students { get; set; } = new HashSet<Student>();
     }
 }

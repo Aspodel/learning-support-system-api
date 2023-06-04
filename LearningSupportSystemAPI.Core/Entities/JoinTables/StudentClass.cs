@@ -10,5 +10,13 @@
 
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
+
+        public PositionType? Position { get; set; }
+    }
+
+    public enum PositionType
+    {
+        Member,
+        Leader
     }
 }

@@ -12,12 +12,24 @@ namespace LearningSupportSystemAPI.DataObjects
         public int Slot { get; set; }
 
         public int CourseId { get; set; }
-        public string? LecturerId { get; set; }
+        public string LecturerId { get; set; } = string.Empty;
         public int? RoomId { get; set; }
-        public int SemesterId { get; set; }
+        public int? SemesterId { get; set; }
 
-        public virtual ICollection<StudentClass> Students { get; set; } = new HashSet<StudentClass>();
-        public virtual ICollection<GradeColumn> GradeColumns { get; set; } = new HashSet<GradeColumn>();
+        public ICollection<StudentClassDTO> Students { get; set; } = new HashSet<StudentClassDTO>();
+        public ICollection<GradeColumnDTO> GradeColumns { get; set; } = new HashSet<GradeColumnDTO>();
+    }
 
+    public class CreateClassDTO
+    {
+        public int StartTime { get; set; }
+        public int EndTime { get; set; }
+        public DayOfWeek Day { get; set; }
+        public int Slot { get; set; }
+
+        public int CourseId { get; set; }
+        public string LecturerId { get; set; } = string.Empty;
+        public int? RoomId { get; set; }
+        public int? SemesterId { get; set; }
     }
 }

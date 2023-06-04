@@ -8,26 +8,26 @@ using System.Linq.Expressions;
 
 namespace LearningSupportSystemAPI.Repository
 {
-    public class UserManager : UserManager<User>
+    public abstract class BaseManager<TUser> : UserManager<TUser> where TUser : User
     {
-        public UserManager(
-            IUserStore<User> store,
+        public BaseManager(
+            IUserStore<TUser> store,
             IOptions<IdentityOptions> optionsAccessor,
-            IPasswordHasher<User> passwordHasher,
-            IEnumerable<IUserValidator<User>> userValidators,
-            IEnumerable<IPasswordValidator<User>> passwordValidators,
+            IPasswordHasher<TUser> passwordHasher,
+            IEnumerable<IUserValidator<TUser>> userValidators,
+            IEnumerable<IPasswordValidator<TUser>> passwordValidators,
             ILookupNormalizer keyNormalizer,
             IdentityErrorDescriber errors,
             IServiceProvider services,
-            ILogger<UserManager<User>> logger
+            ILogger<UserManager<TUser>> logger
         ) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
         }
 
-        public async Task<User?> FindByIdCardAsync(string idCard)
+        public virtual async Task<TUser?> FindByIdCardAsync(string idCard)
             => await Users.Where(u => u.IdCard == idCard).FirstOrDefaultAsync();
 
-        public new async Task<User?> FindByNameAsync(string userName)
+        public new async Task<TUser?> FindByNameAsync(string userName)
         {
             var user = await base.FindByNameAsync(userName);
             if (user is null || user.IsDeleted)
@@ -36,14 +36,9 @@ namespace LearningSupportSystemAPI.Repository
             return user;
         }
 
-        public IQueryable<User> FindAll(Expression<Func<User, bool>>? predicate = null)
+        public virtual IQueryable<TUser> FindAll(Expression<Func<TUser, bool>>? predicate = null)
             => Users
                 .Where(u => !u.IsDeleted)
-                .WhereIf(predicate != null, predicate!);
-
-        public IQueryable<User> FindAllStudents(Expression<Func<User, bool>>? predicate = null)
-            => Users
-                .OfType<Student>()
                 .WhereIf(predicate != null, predicate!);
     }
 }

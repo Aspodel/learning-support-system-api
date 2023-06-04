@@ -15,10 +15,26 @@ namespace LearningSupportSystemAPI.DataObjects.Mapping
 
 
             CreateMap<User, UserDTO>()
-                .ForMember(d => d.Roles, opt => opt.MapFrom(s => s.UserRoles.Select(ur => ur.Role!.Name)));
-            CreateMap<UserDTO, User>();
-                //.ForMember(d => d.Guid, opt => opt.Ignore());
+                .ForMember(d => d.Roles, opt => opt.MapFrom(s => s.UserRoles!.Select(ur => ur.Role!.Name)));
+            CreateMap<UserDTO, User>()
+                .ForMember(d => d.IdCard, opt => opt.Ignore());
             CreateMap<CreateUserDTO, User>();
+
+            CreateMap<Student, StudentDTO>()
+                .ForMember(d => d.RegisteredClasses, opt => opt.MapFrom(s => s.RegisteredClasses.Select(c => c.ClassId)));
+            CreateMap<StudentDTO, Student>()
+                .ForMember(d => d.IdCard, opt => opt.Ignore())
+                .ForMember(d => d.DepartmentId, opt => opt.Ignore())
+                .ForMember(d => d.RegisteredClasses, opt => opt.Ignore());
+            CreateMap<CreateStudentDTO, Student>();
+
+            CreateMap<Lecturer, LecturerDTO>()
+                .ForMember(d => d.Classes, opt => opt.MapFrom(s => s.Classes!.Select(c => c.Id)));
+            CreateMap<LecturerDTO, Lecturer>()
+                .ForMember(d => d.IdCard, opt => opt.Ignore())
+                .ForMember(d => d.DepartmentId, opt => opt.Ignore())
+                .ForMember(d => d.Classes, opt => opt.Ignore());
+            CreateMap<CreateLecturerDTO, Lecturer>();
 
 
             CreateMap<Announcement, AnnouncementDTO>();
@@ -29,11 +45,16 @@ namespace LearningSupportSystemAPI.DataObjects.Mapping
             CreateMap<Class, ClassDTO>();
             CreateMap<ClassDTO, Class>()
                 .ForMember(d => d.Id, opt => opt.Ignore());
+            CreateMap<CreateClassDTO, Class>();
 
 
             CreateMap<Course, CourseDTO>();
             CreateMap<CourseDTO, Course>()
                 .ForMember(d => d.Id, opt => opt.Ignore());
+            CreateMap<CreateCourseDTO, Course>()
+                .ForMember(d => d.PrerequisiteFor, opt => opt.Ignore())
+                .ForMember(d => d.Prerequisites, opt => opt.Ignore());
+
 
 
             CreateMap<CoursePrerequisite, CoursePrerequisiteDTO>();
@@ -43,6 +64,8 @@ namespace LearningSupportSystemAPI.DataObjects.Mapping
             CreateMap<Department, DepartmentDTO>();
             CreateMap<DepartmentDTO, Department>()
                 .ForMember(d => d.Id, opt => opt.Ignore());
+            CreateMap<CreateDepartmentDTO, Department>()
+                .ForMember(d => d.FacultyOfficeId, opt => opt.Ignore());
 
 
             CreateMap<Discussion, DiscussionDTO>();
@@ -68,6 +91,8 @@ namespace LearningSupportSystemAPI.DataObjects.Mapping
             CreateMap<Major, MajorDTO>();
             CreateMap<MajorDTO, Major>()
                 .ForMember(d => d.Id, opt => opt.Ignore());
+            CreateMap<CreateMajorDTO, Major>()
+                .ForMember(d => d.DepartmentId, opt => opt.Ignore());
 
 
             CreateMap<Message, MessageDTO>();
@@ -82,7 +107,9 @@ namespace LearningSupportSystemAPI.DataObjects.Mapping
 
             CreateMap<Room, RoomDTO>();
             CreateMap<RoomDTO, Room>()
-                .ForMember(d => d.Id, opt => opt.Ignore());
+                .ForMember(d => d.Id, opt => opt.Ignore())
+                .ForMember(d => d.Department, opt => opt.Ignore());
+            CreateMap<CreateRoomDTO, Room>();
 
 
             CreateMap<Semester, SemesterDTO>();

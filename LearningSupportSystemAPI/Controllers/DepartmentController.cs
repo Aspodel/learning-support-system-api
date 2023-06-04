@@ -45,7 +45,7 @@ namespace LearningSupportSystemAPI.Controllers
 
         #region [POST]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DepartmentDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateDepartmentDTO dto, CancellationToken cancellationToken = default)
         {
             var department = _mapper.Map<Department>(dto);
             _departmentRepository.Add(department);

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LearningSupportSystemAPI.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230328213251_First")]
+    [Migration("20230528163437_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -75,9 +75,8 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -108,12 +107,13 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("LecturerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("RoomId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SemesterId")
+                    b.Property<int?>("SemesterId")
                         .HasColumnType("int");
 
                     b.Property<int>("Slot")
@@ -150,7 +150,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Credits")
+                    b.Property<int?>("Credits")
                         .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
@@ -233,7 +233,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
@@ -243,7 +243,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                     b.Property<int?>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -336,6 +336,9 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Position")
                         .HasColumnType("int");
 
                     b.HasKey("StudentId", "ClassId");
@@ -491,7 +494,6 @@ namespace LearningSupportSystemAPI.Core.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Building")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Code")
@@ -519,6 +521,10 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
@@ -555,7 +561,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("DepartmentId")
@@ -579,7 +585,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
@@ -746,7 +752,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                 {
                     b.HasBaseType("LearningSupportSystemAPI.Core.Entities.User");
 
-                    b.Property<int>("Level")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.ToTable("Administrators", (string)null);
@@ -769,14 +775,13 @@ namespace LearningSupportSystemAPI.Core.Migrations
                 {
                     b.HasBaseType("LearningSupportSystemAPI.Core.Entities.User");
 
-                    b.Property<int>("MajorId")
+                    b.Property<int?>("MajorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("StartYear")
-                        .HasColumnType("datetime2");
+                    b.Property<int?>("StartYear")
+                        .HasColumnType("int");
 
                     b.Property<string>("SupervisorId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasIndex("MajorId");
@@ -837,7 +842,9 @@ namespace LearningSupportSystemAPI.Core.Migrations
 
                     b.HasOne("LearningSupportSystemAPI.Core.Entities.Lecturer", "Lecturer")
                         .WithMany("Classes")
-                        .HasForeignKey("LecturerId");
+                        .HasForeignKey("LecturerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("LearningSupportSystemAPI.Core.Entities.Room", "Room")
                         .WithMany("Classes")
@@ -846,8 +853,7 @@ namespace LearningSupportSystemAPI.Core.Migrations
                     b.HasOne("LearningSupportSystemAPI.Core.Entities.Semester", "Semester")
                         .WithMany("Classes")
                         .HasForeignKey("SemesterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Course");
 
@@ -1089,14 +1095,12 @@ namespace LearningSupportSystemAPI.Core.Migrations
                     b.HasOne("LearningSupportSystemAPI.Core.Entities.Major", "Major")
                         .WithMany("Students")
                         .HasForeignKey("MajorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LearningSupportSystemAPI.Core.Entities.Lecturer", "Supervisor")
                         .WithMany("Students")
                         .HasForeignKey("SupervisorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Major");
 

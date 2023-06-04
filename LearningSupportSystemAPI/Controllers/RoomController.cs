@@ -13,13 +13,15 @@ namespace LearningSupportSystemAPI.Controllers
     {
         #region [Fields]
         private readonly IRoomRepository _roomRepository;
+        private readonly IDepartmentRepository _departmentRepository;
         private readonly IMapper _mapper;
         #endregion
 
         #region [Ctor]
-        public RoomController(IRoomRepository roomRepository, IMapper mapper)
+        public RoomController(IRoomRepository roomRepository, IDepartmentRepository departmentRepository, IMapper mapper)
         {
             _roomRepository = roomRepository;
+            _departmentRepository = departmentRepository;
             _mapper = mapper;
         }
         #endregion
@@ -45,9 +47,19 @@ namespace LearningSupportSystemAPI.Controllers
 
         #region [POST]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RoomDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateRoomDTO dto, CancellationToken cancellationToken = default)
         {
             var room = _mapper.Map<Room>(dto);
+
+            if (dto.DepartmentId.HasValue)
+            {
+                var department = await _departmentRepository.FindByIdAsync(dto.DepartmentId.Value, cancellationToken);
+                if (department != null)
+                {
+                    room.Department = department;
+                }
+            }
+
             _roomRepository.Add(room);
             await _roomRepository.SaveChangesAsync(cancellationToken);
 

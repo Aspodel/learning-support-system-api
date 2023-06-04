@@ -13,16 +13,16 @@ namespace LearningSupportSystemAPI.Core.Entities
         public int CourseId { get; set; }
         public Course? Course { get; set; }
 
-        public string? LecturerId { get; set; }
+        public string LecturerId { get; set; } = string.Empty;
         public Lecturer? Lecturer { get; set; }
 
         public int? RoomId { get; set; }
         public Room? Room { get; set; }
 
-        public int SemesterId { get; set; }
+        public int? SemesterId { get; set; }
         public Semester? Semester { get; set; }
 
-        public virtual ICollection<StudentClass> Students { get; set; } = new HashSet<StudentClass>();
-        public virtual ICollection<GradeColumn> GradeColumns { get; set; } = new HashSet<GradeColumn>();
+        public ICollection<StudentClass>? Students { get; set; }
+        public ICollection<GradeColumn>? GradeColumns { get; set; }
     }
 }

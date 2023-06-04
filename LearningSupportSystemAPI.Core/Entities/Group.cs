@@ -7,6 +7,6 @@ namespace LearningSupportSystemAPI.Core.Entities
         public string Name { get; set; } = string.Empty;
         public string ProjectName { get; set; } = string.Empty;
 
-        public virtual ICollection<StudentClass> Students { get; set; } = new HashSet<StudentClass>();
+        public ICollection<StudentClass> Students { get; set; } = new HashSet<StudentClass>();
     }
 }

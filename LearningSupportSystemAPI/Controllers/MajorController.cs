@@ -13,13 +13,15 @@ namespace LearningSupportSystemAPI.Controllers
     {
         #region [Fields]
         private readonly IMajorRepository _majorRepository;
+        private readonly IDepartmentRepository _departmentRepository;
         private readonly IMapper _mapper;
         #endregion
 
         #region [Ctor]
-        public MajorController(IMajorRepository majorRepository, IMapper mapper)
+        public MajorController(IMajorRepository majorRepository, IDepartmentRepository departmentRepository, IMapper mapper)
         {
             _majorRepository = majorRepository;
+            _departmentRepository = departmentRepository;
             _mapper = mapper;
         }
         #endregion
@@ -45,9 +47,15 @@ namespace LearningSupportSystemAPI.Controllers
 
         #region [POST]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MajorDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateMajorDTO dto, CancellationToken cancellationToken = default)
         {
+            var department = await _departmentRepository.FindByIdAsync(dto.DepartmentId, cancellationToken);
+            if (department is null)
+                return NotFound();
+
             var major = _mapper.Map<Major>(dto);
+            major.Department = department;
+
             _majorRepository.Add(major);
             await _majorRepository.SaveChangesAsync(cancellationToken);
 

@@ -1,14 +1,15 @@
+using LearningSupportSystemAPI;
 using LearningSupportSystemAPI.Contract;
 using LearningSupportSystemAPI.Core.Database;
 using LearningSupportSystemAPI.Core.Entities;
 using LearningSupportSystemAPI.Repository;
-using LearningSupportSystemAPI.Services;
 using LearningSupportSystemAPI.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
@@ -19,6 +20,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 
 #region Connect to Azure App Configuration
 string azureAppConfigConnectionString = configuration.GetConnectionString("AppConfig")!;
@@ -110,6 +115,27 @@ builder.Services.AddIdentity<User, Role>(options =>
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddUserManager<UserManager>()
                 .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityCore<Student>()
+    .AddRoles<Role>()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<Student, Role>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddUserManager<StudentManager>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityCore<Lecturer>()
+    .AddRoles<Role>()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<Lecturer, Role>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddUserManager<LecturerManager>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityCore<Administrator>()
+    .AddRoles<Role>()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<Administrator, Role>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddUserManager<AdminManager>()
+    .AddDefaultTokenProviders();
 #endregion
 
 var app = builder.Build();

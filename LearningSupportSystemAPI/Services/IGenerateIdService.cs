@@ -1,10 +1,12 @@
 ﻿using LearningSupportSystemAPI.Core.Entities;
 
-namespace LearningSupportSystemAPI.Services
+namespace LearningSupportSystemAPI;
+
+public interface IGenerateIdService
 {
-    public interface IGenerateIdService
-    {
-        string GenerateStudentIdCard(Student student);
-        string GenerateUserId();
-    }
+    string GenerateUserIdCard();
+    string GenerateStudentIdCard(Student student);
+    string GenerateLecturerIdCard(Lecturer lecturer);
+    string GenerateCourseCode(Course course);
+    string GenerateClassCode(Class cla);
 }

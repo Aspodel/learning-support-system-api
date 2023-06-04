@@ -16,6 +16,6 @@
     public enum NotificationType
     {
         Message,
-        System
+        Announcement
     }
 }

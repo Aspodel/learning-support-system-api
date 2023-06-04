@@ -2,6 +2,13 @@
 {
     public class Administrator : User
     {
-        public int Level { get; set; }
+        public AdminType Type { get; set; } = AdminType.System;
+    }
+
+    public enum AdminType
+    {
+        System,
+        School,
+        Department,
     }
 }
