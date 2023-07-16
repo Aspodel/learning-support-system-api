@@ -37,7 +37,8 @@ public class MappingProfile : Profile
 
 
         CreateMap<Lecturer, LecturerDTO>()
-            .ForMember(d => d.Classes, opt => opt.MapFrom(s => s.Classes!.Select(c => c.Id)));
+            .ForMember(d => d.Classes, opt => opt.Ignore());
+        // .ForMember(d => d.Classes, opt => opt.MapFrom(s => s.Classes!.Select(c => c.Id)));
         CreateMap<LecturerDTO, Lecturer>()
             .ForMember(d => d.IdCard, opt => opt.Ignore())
             .ForMember(d => d.DepartmentId, opt => opt.Ignore())

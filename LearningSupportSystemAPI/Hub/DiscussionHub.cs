@@ -5,24 +5,28 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace LearningSupportSystemAPI;
 
-// [Authorize]
 public class DiscussionHub : Hub
 {
-    public async Task SendMessage(Message message)
+    public async Task SendMessage(int discussionId, string content)
     {
-        await Clients.Group($"Discussion-{message.DiscussionId}").SendAsync("ReceiveMessage", message);
+        // Get the current user's ID
+        var userId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Here you can perform additional checks to validate the user, discussion, etc.
+
+        // Save the message to the database (you'll need to implement your data access here)
+
+        // Broadcast the message to all connected clients in the same group (discussion)
+        await Clients.Group(discussionId.ToString()).SendAsync("ReceiveMessage", userId, content);
     }
 
-    public async Task JoinDiscussion(int discussionId)
+    public async Task JoinDiscussionGroup(int discussionId)
     {
-        var groupName = $"Discussion-{discussionId}";
-        await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        await Groups.AddToGroupAsync(Context.ConnectionId, discussionId.ToString());
     }
 
-    public async Task LeaveDiscussion(int discussionId)
+    public async Task LeaveDiscussionGroup(int discussionId)
     {
-        var groupName = $"Discussion-{discussionId}";
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, discussionId.ToString());
     }
-
 }

@@ -52,8 +52,9 @@ namespace LearningSupportSystemAPI.Controllers
             await _messageRepository.SaveChangesAsync(cancellationToken);
 
             await _hubContext.Clients
-                    .Group($"Discussion-{message.DiscussionId}")
-                    .SendAsync("ReceiveMessage", message);
+                    .Group("2")
+                    .SendAsync("ReceiveMessage", message.SenderId, message.Content);
+
 
             return Ok(_mapper.Map<MessageDTO>(message));
         }
