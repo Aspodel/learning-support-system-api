@@ -1,6 +1,4 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI;
+﻿namespace LearningSupportSystemAPI;
 
 public interface IGenerateIdService
 {

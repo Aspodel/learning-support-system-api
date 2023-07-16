@@ -1,7 +1,4 @@
-﻿using LearningSupportSystemAPI.Core.Database;
-using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI;
+﻿namespace LearningSupportSystemAPI;
 
 public class GenerateIdService : IGenerateIdService
 {
@@ -19,35 +16,31 @@ public class GenerateIdService : IGenerateIdService
     #region [Methods]
     private string GenerateSuffix<T>(string prefix, Func<T, string> idSelector) where T : class
     {
-        // var suffix = _context.Set<T>().ToList().Max(x => idSelector(x).Substring(prefix.Length)); // find the maximum existing suffix
-        // suffix = suffix == null ? "001" : (int.Parse(suffix) + 1).ToString("D3"); // increment by one and pad with zeros
+        var maxSuffix = _context.Set<T>()
+                            .Select(idSelector)
+                            .Where(x => x.StartsWith(prefix))
+                            .Select(x => x.Substring(prefix.Length))
+                            .ToList()
+                            .Max(); // find the maximum existing suffix
 
-        // return suffix; // return the generated suffix
-        var existingSuffixes = _context.Set<T>().Select(x => idSelector(x)).ToList();
-
-        var suffix = 1;
-        while (existingSuffixes.Contains($"{prefix}{suffix:D3}"))
-        {
-            suffix++;
-        }
-
-        return suffix.ToString("D3");
+        var newSuffix = maxSuffix == null ? "001" : (int.Parse(maxSuffix) + 1).ToString("D3"); // increment by one and pad with zeros
+        return newSuffix;
     }
 
     public string GenerateUserIdCard()
     {
         var prefix = "User";
-        var suffix = GenerateSuffix<User>(prefix, u => u.IdCard); // use private method to generate suffix
-        return prefix + suffix; // return concatenated string
+        var suffix = GenerateSuffix<User>(prefix, u => u.IdCard);
+        return prefix + suffix;
     }
 
     public string GenerateStudentIdCard(Student student)
     {
-        var department = student.Department!.ShortName; // get department short name
+        var department = student.Department!.ShortName;
         var major = student.Major?.ShortName ?? department;
         var prefix = $"{department}{major}{student.StartYear % 100}"; // create prefix from parameters
-        var suffix = GenerateSuffix<Student>(prefix, s => s.IdCard); // use private method to generate suffix
-        return prefix + suffix; // return concatenated string
+        var suffix = GenerateSuffix<Student>(prefix, s => s.IdCard);
+        return prefix + suffix;
     }
 
     public string GenerateLecturerIdCard(Lecturer lecturer)

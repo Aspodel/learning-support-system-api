@@ -1,14 +1,13 @@
-﻿namespace LearningSupportSystemAPI.Core.Entities
-{
-    public class Administrator : User
-    {
-        public AdminType Type { get; set; } = AdminType.System;
-    }
+﻿namespace LearningSupportSystemAPI;
 
-    public enum AdminType
-    {
-        System,
-        School,
-        Department,
-    }
+public class Administrator : User
+{
+    public AdminType Type { get; set; } = AdminType.System;
+}
+
+public enum AdminType
+{
+    System,
+    School,
+    Department,
 }

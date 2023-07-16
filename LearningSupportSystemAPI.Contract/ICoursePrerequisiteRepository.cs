@@ -1,8 +1,5 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.Contract
+public interface ICoursePrerequisiteRepository : IBaseRepository<CoursePrerequisite>
 {
-    public interface ICoursePrerequisiteRepository : IBaseRepository<CoursePrerequisite>
-    {
-    }
 }

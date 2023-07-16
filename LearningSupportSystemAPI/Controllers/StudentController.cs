@@ -1,9 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.Core.Entities.JoinTables;
-using LearningSupportSystemAPI.DataObjects;
-using LearningSupportSystemAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +31,7 @@ namespace LearningSupportSystemAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
         {
-            var students = await _studentManager.FindAll().ToListAsync(cancellationToken);
+            var students = await _studentManager.FindAll().OrderBy(d => d.IdCard).ToListAsync(cancellationToken);
             return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
         }
 
@@ -49,8 +44,42 @@ namespace LearningSupportSystemAPI.Controllers
 
             return Ok(_mapper.Map<StudentDTO>(student));
         }
+
+        [HttpGet("department/{departmentId}")]
+        public async Task<IActionResult> GetByDepartment(int departmentId, CancellationToken cancellationToken = default)
+        {
+            var department = await _departmentRepository.FindByIdAsync(departmentId);
+            if (department is null)
+                return NotFound();
+
+            var students = await _studentManager.FindAllByDepartment(departmentId).OrderBy(d => d.IdCard).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
+        }
         #endregion
 
+        [HttpGet("export/class/{classId}")]
+        public async Task<IActionResult> ExportExcelByClass(int classId, CancellationToken cancellationToken = default)
+        {
+            var cla = await _classRepository.FindByIdAsync(classId);
+            if (cla is null)
+                return NotFound();
+
+            var students = await _studentManager.FindAllByClass(cla.Id).OrderBy(d => d.IdCard).ToListAsync(cancellationToken);
+            var datalist = _mapper.Map<IEnumerable<ExportStudentDTO>>(students).ToList();
+            var file = datalist.ExportToFile<ExportStudentDTO>($"{cla.ClassCode} - students");
+
+            return file;
+        }
+
+        [HttpGet("ungroup/{classId}")]
+        public async Task<IActionResult> GetUngroup(int classId, CancellationToken cancellationToken = default)
+        {
+            var students = await _studentManager.FindAllByClass(classId,
+                student => !student.RegisteredClasses.Any(rc => rc.GroupId.HasValue && rc.ClassId == classId))
+                .OrderBy(d => d.IdCard)
+                .ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
+        }
         #region [POST]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStudentDTO dto)
@@ -65,7 +94,6 @@ namespace LearningSupportSystemAPI.Controllers
             student.IdCard = _generateIdService.GenerateStudentIdCard(student);
             student.UserName = student.IdCard;
 
-
             var result = await _studentManager.CreateAsync(student, dto.DateOfBirth.ToString("ddMMyy"));
             if (!result.Succeeded)
             {
@@ -73,15 +101,44 @@ namespace LearningSupportSystemAPI.Controllers
                 return BadRequest(result);
             }
 
-            // Add user to specified roles
-            var addToRolesResult = await _studentManager.AddToRolesAsync(student, dto.Roles);
+            var addToRolesResult = await _studentManager.AddToRoleAsync(student, "student");
             if (!addToRolesResult.Succeeded)
+                _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", student.IdCard, string.Join(", ", "student"), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+
+            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(student));
+        }
+
+        [HttpPost("create-from-excel")]
+        public async Task<IActionResult> CreateFromExcel(IFormFile file, CancellationToken cancellationToken = default)
+        {
+            var datatable = await file.GetExcelDataTable(cancellationToken);
+            var studentList = datatable.GetEntitiesFromDataTable<CreateStudentExcelDTO>();
+            var departments = await _departmentRepository.FindAll().ToListAsync(cancellationToken);
+            var students = new List<Student>();
+            foreach (var dto in studentList)
             {
-                _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", student.IdCard, string.Join(", ", dto.Roles), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
-                //return BadRequest("Fail to add role");
+                var department = departments.FirstOrDefault(d => d.ShortName == dto.Department);
+                if (department is null)
+                    return NotFound($"Department {dto.Department} not found");
+
+                var student = _mapper.Map<CreateStudentExcelDTO, Student>(dto);
+                student.Department = department;
+                student.StartYear = dto.StartYear ?? DateTime.UtcNow.Year;
+                student.IdCard = _generateIdService.GenerateStudentIdCard(student);
+                student.UserName = student.IdCard;
+
+                var result = await _studentManager.CreateAsync(student, dto.DateOfBirth.ToString("ddMMyy"));
+                if (!result.Succeeded)
+                {
+                    _logger.LogError("Unable to create user {username}. Result details: {result}", dto.FirstName, string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+                    return BadRequest(result);
+                }
+
+                var addToRolesResult = await _studentManager.AddToRoleAsync(student, "student");
+                students.Add(student);
             }
 
-            return Ok(_mapper.Map<StudentDTO>(student));
+            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
         }
         #endregion
 

@@ -1,8 +1,7 @@
-﻿namespace LearningSupportSystemAPI.DataObjects
+﻿namespace LearningSupportSystemAPI;
+
+public class CoursePrerequisiteDTO
 {
-    public class CoursePrerequisiteDTO
-    {
-        public int CourseId { get; set; }
-        public int PrerequisiteId { get; set; }
-    }
+    public int CourseId { get; set; }
+    public int PrerequisiteId { get; set; }
 }

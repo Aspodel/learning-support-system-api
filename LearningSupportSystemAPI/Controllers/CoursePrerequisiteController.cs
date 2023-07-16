@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

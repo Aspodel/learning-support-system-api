@@ -1,10 +1,9 @@
-﻿namespace LearningSupportSystemAPI.DataObjects
-{
-    public abstract class BaseDTO<T>
-    {
-        //[FromRoute]
-        public T Id { get; set; } = default!;
-    }
+﻿namespace LearningSupportSystemAPI;
 
-    public abstract class BaseDTO : BaseDTO<int> { }
+public abstract class BaseDTO<T>
+{
+    //[FromRoute]
+    public T Id { get; set; } = default!;
 }
+
+public abstract class BaseDTO : BaseDTO<int> { }

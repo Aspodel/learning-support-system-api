@@ -1,8 +1,5 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.Contract
+public interface IClassRepository : IBaseRepository<Class>
 {
-    public interface IClassRepository : IBaseRepository<Class>
-    {
-    }
 }

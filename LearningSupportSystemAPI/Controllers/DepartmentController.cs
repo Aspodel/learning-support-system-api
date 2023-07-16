@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,6 +51,17 @@ namespace LearningSupportSystemAPI.Controllers
             await _departmentRepository.SaveChangesAsync(cancellationToken);
 
             return Ok(_mapper.Map<DepartmentDTO>(department));
+        }
+
+        [HttpPost("create-from-excel")]
+        public async Task<IActionResult> CreateFromExcel([FromForm] IFormFile file, CancellationToken cancellationToken = default)
+        {
+            var datatable = await file.GetExcelDataTable(cancellationToken);
+            var departments = datatable.GetEntitiesFromDataTable<Department>();
+            
+            _departmentRepository.AddRange(departments);
+            await _departmentRepository.SaveChangesAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<DepartmentDTO>>(departments));
         }
         #endregion
 

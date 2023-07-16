@@ -1,8 +1,7 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.Contract
+public interface IGradeRepository : IBaseRepository<Grade>
 {
-    public interface IGradeRepository : IBaseRepository<Grade>
-    {
-    }
+    Task<Grade?> FindByDetail(string studentId, int gradeColumnId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Grade>> FindByStudent(string studentId, CancellationToken cancellationToken = default);
 }

@@ -1,11 +1,6 @@
-﻿using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Database;
-using LearningSupportSystemAPI.Core.Entities;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.Repository
+public class DepartmentRepository : BaseRepository<Department>, IDepartmentRepository
 {
-    public class DepartmentRepository : BaseRepository<Department>, IDepartmentRepository
-    {
-        public DepartmentRepository(ApplicationDbContext context) : base(context) { }
-    }
+    public DepartmentRepository(ApplicationDbContext context) : base(context) { }
 }

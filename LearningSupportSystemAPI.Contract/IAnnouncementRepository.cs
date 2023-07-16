@@ -1,8 +1,5 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.Contract
+public interface IAnnouncementRepository : IBaseRepository<Announcement>
 {
-    public interface IAnnouncementRepository : IBaseRepository<Announcement>
-    {
-    }
 }

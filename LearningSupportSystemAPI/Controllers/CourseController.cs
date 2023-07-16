@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +41,16 @@ namespace LearningSupportSystemAPI.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<CourseDTO>(course));
+        }
+        [HttpGet("department/{departmentId}")]
+        public async Task<IActionResult> GetByDepartment(int departmentId, CancellationToken cancellationToken = default)
+        {
+            var department = await _departmentRepository.FindByIdAsync(departmentId, cancellationToken);
+            if (department is null)
+                return BadRequest("Department is not exist");
+
+            var courses = await _courseRepository.FindAllByDepartment(department.Id).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<CourseDTO>>(courses));
         }
         #endregion
 

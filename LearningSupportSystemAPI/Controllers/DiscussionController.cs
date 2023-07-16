@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,7 +26,7 @@ namespace LearningSupportSystemAPI.Controllers
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
         {
             var discussions = await _discussionRepository.FindAll().ToListAsync(cancellationToken);
-            return Ok(_mapper.Map<IEnumerable<DepartmentDTO>>(discussions));
+            return Ok(_mapper.Map<IEnumerable<DiscussionDTO>>(discussions));
         }
 
         [HttpGet("{id}")]
@@ -39,25 +36,39 @@ namespace LearningSupportSystemAPI.Controllers
             if (discussion is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DepartmentDTO>(discussion));
+            return Ok(_mapper.Map<DiscussionDTO>(discussion));
+        }
+
+        [HttpGet("group/{groupId}")]
+        public async Task<IActionResult> GetByGroup(int groupId, CancellationToken cancellationToken = default)
+        {
+            var discussions = await _discussionRepository.FindAll(d => d.GroupId == groupId).FirstOrDefaultAsync(cancellationToken);
+            return Ok(_mapper.Map<DiscussionDTO>(discussions));
+        }
+
+        [HttpGet("class/{classId}")]
+        public async Task<IActionResult> GetByClass(int classId, CancellationToken cancellationToken = default)
+        {
+            var discussions = await _discussionRepository.FindAll(d => d.ClassId == classId).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<DiscussionDTO>>(discussions));
         }
         #endregion
 
         #region [POST]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DepartmentDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateDiscussionDTO dto, CancellationToken cancellationToken = default)
         {
             var discussion = _mapper.Map<Discussion>(dto);
             _discussionRepository.Add(discussion);
             await _discussionRepository.SaveChangesAsync(cancellationToken);
 
-            return Ok(_mapper.Map<DepartmentDTO>(discussion));
+            return Ok(_mapper.Map<DiscussionDTO>(discussion));
         }
         #endregion
 
         #region [PUT]
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] DepartmentDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update([FromBody] DiscussionDTO dto, CancellationToken cancellationToken = default)
         {
             var discussion = await _discussionRepository.FindByIdAsync(dto.Id, cancellationToken);
             if (discussion is null)

@@ -1,8 +1,2 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI.Contract
-{
-    public interface ISemesterRepository : IBaseRepository<Semester>
-    {
-    }
-}
+﻿namespace LearningSupportSystemAPI; 
+public interface ISemesterRepository : IBaseRepository<Semester> { }

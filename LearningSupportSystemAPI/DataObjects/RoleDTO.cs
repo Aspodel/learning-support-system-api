@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LearningSupportSystemAPI.DataObjects
+namespace LearningSupportSystemAPI;
+
+public class RoleDTO : BaseDTO<string>
 {
-    public class RoleDTO : BaseDTO<string>
-    {
-        [Required]
-        public string Name { get; set; } = string.Empty;
-    }
+    [Required]
+    public string Name { get; set; } = string.Empty;
 }

@@ -1,8 +1,2 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI.Contract
-{
-    public interface IMessageRepository : IBaseRepository<Message>
-    {
-    }
-}
+﻿namespace LearningSupportSystemAPI; 
+public interface IMessageRepository : IBaseRepository<Message> { }

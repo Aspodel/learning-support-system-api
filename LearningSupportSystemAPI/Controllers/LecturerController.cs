@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +31,7 @@ namespace LearningSupportSystemAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
         {
-            var lecturers = await _lecturerManager.FindAll().ToListAsync(cancellationToken);
+            var lecturers = await _lecturerManager.FindAll().OrderBy(l => l.IdCard).ToListAsync(cancellationToken);
             return Ok(_mapper.Map<IEnumerable<LecturerDTO>>(lecturers));
         }
 
@@ -46,6 +43,16 @@ namespace LearningSupportSystemAPI.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<LecturerDTO>(lecturer));
+        }
+        [HttpGet("department/{departmentId}")]
+        public async Task<IActionResult> GetByDepartment(int departmentId, CancellationToken cancellationToken = default)
+        {
+            var department = await _departmentRepository.FindByIdAsync(departmentId);
+            if (department is null)
+                return NotFound();
+
+            var lecturers = await _lecturerManager.FindAllByDepartment(departmentId).OrderBy(l => l.IdCard).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<LecturerDTO>>(lecturers));
         }
         #endregion
 
@@ -70,14 +77,49 @@ namespace LearningSupportSystemAPI.Controllers
             }
 
             // Add user to specified roles
-            var addToRolesResult = await _lecturerManager.AddToRolesAsync(lecturer, dto.Roles);
+            var addToRolesResult = await _lecturerManager.AddToRoleAsync(lecturer, "lecturer");
             if (!addToRolesResult.Succeeded)
             {
-                _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", lecturer.IdCard, string.Join(", ", dto.Roles), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+                _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", lecturer.IdCard, string.Join(", ", "lecturer"), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
                 //return BadRequest("Fail to add role");
             }
 
             return Ok(_mapper.Map<LecturerDTO>(lecturer));
+        }
+
+        [HttpPost("create-from-excel")]
+        public async Task<IActionResult> CreateFromExcel(IFormFile file, CancellationToken cancellationToken = default)
+        {
+            var datatable = await file.GetExcelDataTable(cancellationToken);
+            var dtos = datatable.GetEntitiesFromDataTable<CreateLecturerExcelDTO>();
+            var departments = await _departmentRepository.FindAll().ToListAsync(cancellationToken);
+            var lecturers = new List<Lecturer>();
+            foreach (var dto in dtos)
+            {
+                var department = departments.FirstOrDefault(d => d.ShortName == dto.Department);
+                if (department is null)
+                    return NotFound($"Department {dto.Department} not found");
+
+                var lecturer = _mapper.Map<Lecturer>(dto);
+                lecturer.Department = department;
+                lecturer.IdCard = _generateIdService.GenerateLecturerIdCard(lecturer);
+                lecturer.UserName = lecturer.IdCard;
+
+                var result = await _lecturerManager.CreateAsync(lecturer, dto.DateOfBirth.ToString("ddMMyy"));
+                if (!result.Succeeded)
+                {
+                    _logger.LogError("Unable to create user {username}. Result details: {result}", dto.FirstName, string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+                    return BadRequest(result);
+                }
+
+                var addToRolesResult = await _lecturerManager.AddToRoleAsync(lecturer, "lecturer");
+                if (!addToRolesResult.Succeeded)
+                    _logger.LogError("Unable to assign user {username} to roles {roles}. Result details: {result}", lecturer.IdCard, string.Join(", ", "lecturer"), string.Join(Environment.NewLine, result.Errors.Select(e => e.Description)));
+
+                lecturers.Add(lecturer);
+            }
+
+            return Ok(_mapper.Map<IEnumerable<LecturerDTO>>(lecturers));
         }
         #endregion
 

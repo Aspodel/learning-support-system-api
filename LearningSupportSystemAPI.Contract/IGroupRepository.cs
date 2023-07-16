@@ -1,8 +1,5 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI.Contract
+﻿namespace LearningSupportSystemAPI;
+public interface IGroupRepository : IBaseRepository<Group>
 {
-    public interface IGroupRepository : IBaseRepository<Group>
-    {
-    }
+    IQueryable<Group> FindAllByClass(int classId);
 }

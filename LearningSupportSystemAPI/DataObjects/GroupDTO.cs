@@ -1,13 +1,18 @@
-﻿using LearningSupportSystemAPI.Core.Entities.JoinTables;
+﻿namespace LearningSupportSystemAPI;
 
-namespace LearningSupportSystemAPI.DataObjects
+public class GroupDTO : BaseDTO
 {
-    public class GroupDTO : BaseDTO
-    {
-        public string Name { get; set; } = string.Empty;
-        public string ProjectName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string ProjectName { get; set; } = string.Empty;
 
-        public virtual ICollection<StudentClass> Students { get; set; } = new HashSet<StudentClass>();
-
-    }
+    public ICollection<StudentClassDTO>? Students { get; set; }
 }
+
+public class CreateGroupDTO
+{
+    public string Name { get; set; } = string.Empty;
+    public string ProjectName { get; set; } = string.Empty;
+
+    public ICollection<string>? Students { get; set; }
+}
+

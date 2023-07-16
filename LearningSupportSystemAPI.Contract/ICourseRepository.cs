@@ -1,8 +1,8 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
+﻿using System.Linq.Expressions;
 
-namespace LearningSupportSystemAPI.Contract
+namespace LearningSupportSystemAPI;
+
+public interface ICourseRepository : IBaseRepository<Course>
 {
-    public interface ICourseRepository : IBaseRepository<Course>
-    {
-    }
+    IQueryable<Course> FindAllByDepartment(int departmentId, Expression<Func<Course, bool>>? predicate = null);
 }

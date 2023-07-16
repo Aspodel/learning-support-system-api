@@ -1,8 +1,2 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI.Contract
-{
-    public interface IMajorRepository : IBaseRepository<Major>
-    {
-    }
-}
+﻿namespace LearningSupportSystemAPI; 
+public interface IMajorRepository : IBaseRepository<Major> { }

@@ -1,13 +1,10 @@
 using LearningSupportSystemAPI;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Database;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.Repository;
 using LearningSupportSystemAPI.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -19,7 +16,33 @@ ConfigurationManager configuration = builder.Configuration; // allows both to ac
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "EduSystem API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
@@ -38,26 +61,39 @@ builder.Services.Configure<JwtTokenConfig>(configuration.GetSection(nameof(JwtTo
 
 #region [Connect to database]
 var eduConfig = configuration.GetSection(nameof(EduConfig)).Get<EduConfig>();
-builder.Services.AddDbContextPool<ApplicationDbContext>(options => options.UseSqlServer(eduConfig!.ConnectionString));
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(eduConfig!.ConnectionString);
+    // options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    options.EnableSensitiveDataLogging();
+});
 #endregion
 
 #region [Add dependency injection]
-builder.Services.AddTransient<IAnnouncementRepository, AnnouncementRepository>();
-builder.Services.AddTransient<IClassRepository, ClassRepository>();
-builder.Services.AddTransient<ICoursePrerequisiteRepository, CoursePrerequisiteRepository>();
-builder.Services.AddTransient<ICourseRepository, CourseRepository>();
-builder.Services.AddTransient<IDepartmentRepository, DepartmentRepository>();
-builder.Services.AddTransient<IDiscussionRepository, DiscussionRepository>();
-builder.Services.AddTransient<IGradeColumnRepository, GradeColumnRepository>();
-builder.Services.AddTransient<IGradeRepository, GradeRepository>();
-builder.Services.AddTransient<IGroupRepository, GroupRepository>();
-builder.Services.AddTransient<IMajorRepository, MajorRepository>();
-builder.Services.AddTransient<IMessageRepository, MessageRepository>();
-builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
-builder.Services.AddTransient<IRoomRepository, RoomRepository>();
-builder.Services.AddTransient<ISemesterRepository, SemesterRepository>();
+builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<ICoursePrerequisiteRepository, CoursePrerequisiteRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IDiscussionRepository, DiscussionRepository>();
+builder.Services.AddScoped<IGradeColumnRepository, GradeColumnRepository>();
+builder.Services.AddScoped<IGradeRepository, GradeRepository>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IMajorRepository, MajorRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
+builder.Services.AddScoped<IToDoItemRepository, ToDoItemRepository>();
+builder.Services.AddScoped<IToDoListRepository, ToDoListRepository>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IFileSubmissionRepository, FileSubmissionRepository>();
+builder.Services.AddScoped<IAnswerSubmissionRepository, AnswerSubmissionRepository>();
 
-builder.Services.AddTransient<IGenerateIdService, GenerateIdService>();
+builder.Services.AddScoped<IBlobService, BlobService>();
+builder.Services.AddScoped<IGenerateIdService, GenerateIdService>();
 #endregion
 
 #region [Add Authentication]
@@ -94,7 +130,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins("http://localhost:3000", "https://blog-hub.netlify.app")
+            .WithOrigins("http://localhost:3000", "https://edu-assist.netlify.app")
             .AllowCredentials();
     });
 });
@@ -138,6 +174,8 @@ builder.Services.AddIdentityCore<Administrator>()
     .AddDefaultTokenProviders();
 #endregion
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -149,10 +187,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseCors("ClientPermission"); // Use the CORS policy
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<DiscussionHub>("/hub");
 
 app.Run();

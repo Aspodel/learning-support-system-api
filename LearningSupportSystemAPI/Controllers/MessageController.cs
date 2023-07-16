@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LearningSupportSystemAPI.Controllers
@@ -13,13 +11,15 @@ namespace LearningSupportSystemAPI.Controllers
     {
         #region [Fields]
         private readonly IMessageRepository _messageRepository;
+        private readonly IHubContext<DiscussionHub> _hubContext;
         private readonly IMapper _mapper;
         #endregion
 
         #region [Ctor]
-        public MessageController(IMessageRepository messageRepository, IMapper mapper)
+        public MessageController(IMessageRepository messageRepository, IHubContext<DiscussionHub> hubContext, IMapper mapper)
         {
             _messageRepository = messageRepository;
+            _hubContext = hubContext;
             _mapper = mapper;
         }
         #endregion
@@ -50,6 +50,10 @@ namespace LearningSupportSystemAPI.Controllers
             var message = _mapper.Map<Message>(dto);
             _messageRepository.Add(message);
             await _messageRepository.SaveChangesAsync(cancellationToken);
+
+            await _hubContext.Clients
+                    .Group($"Discussion-{message.DiscussionId}")
+                    .SendAsync("ReceiveMessage", message);
 
             return Ok(_mapper.Map<MessageDTO>(message));
         }

@@ -1,8 +1,2 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-
-namespace LearningSupportSystemAPI.Contract
-{
-    public interface IRoomRepository : IBaseRepository<Room>
-    {
-    }
-}
+﻿namespace LearningSupportSystemAPI; 
+public interface IRoomRepository : IBaseRepository<Room> { }

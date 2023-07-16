@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +38,13 @@ namespace LearningSupportSystemAPI.Controllers
 
             return Ok(_mapper.Map<GradeColumnDTO>(gradeColumn));
         }
+
+        [HttpGet("class/{classId}")]
+        public async Task<IActionResult> GetByClass(int classId, CancellationToken cancellationToken = default)
+        {
+            var gradeColumns = await _gradeColumnRepository.FindAllByClass(classId).OrderBy(gc => gc.Order).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<GradeColumnDTO>>(gradeColumns));
+        }
         #endregion
 
         #region [POST]
@@ -52,6 +56,16 @@ namespace LearningSupportSystemAPI.Controllers
             await _gradeColumnRepository.SaveChangesAsync(cancellationToken);
 
             return Ok(_mapper.Map<GradeColumnDTO>(gradeColumn));
+        }
+
+        [HttpPost("create-range")]
+        public async Task<IActionResult> CreateRange([FromBody] IEnumerable<GradeColumnDTO> dtos, CancellationToken cancellationToken = default)
+        {
+            var gradeColumns = _mapper.Map<IEnumerable<GradeColumn>>(dtos);
+            _gradeColumnRepository.AddRange(gradeColumns);
+            await _gradeColumnRepository.SaveChangesAsync(cancellationToken);
+
+            return Ok(_mapper.Map<IEnumerable<GradeColumnDTO>>(gradeColumns));
         }
         #endregion
 
@@ -69,6 +83,20 @@ namespace LearningSupportSystemAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("update-range")]
+        public async Task<IActionResult> UpdateRange([FromBody] IEnumerable<GradeColumnDTO> dtos, CancellationToken cancellationToken = default)
+        {
+            var gradeColumns = await _gradeColumnRepository.FindAll().ToListAsync(cancellationToken);
+            if (gradeColumns is null)
+                return NotFound();
+
+            _mapper.Map(dtos, gradeColumns);
+            _gradeColumnRepository.UpdateRange(gradeColumns);
+            await _gradeColumnRepository.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
         #endregion
 
         #region [DELETE]
@@ -80,6 +108,19 @@ namespace LearningSupportSystemAPI.Controllers
                 return NotFound();
 
             _gradeColumnRepository.Delete(gradeColumn);
+            await _gradeColumnRepository.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("delete-range")]
+        public async Task<IActionResult> DeleteRange([FromBody] IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        {
+            var gradeColumns = await _gradeColumnRepository.FindAll().Where(gc => ids.Contains(gc.Id)).ToListAsync(cancellationToken);
+            if (gradeColumns is null)
+                return NotFound();
+
+            _gradeColumnRepository.DeleteRange(gradeColumns);
             await _gradeColumnRepository.SaveChangesAsync(cancellationToken);
 
             return NoContent();

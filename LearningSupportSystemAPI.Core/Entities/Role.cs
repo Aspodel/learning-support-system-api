@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace LearningSupportSystemAPI.Core.Entities
+namespace LearningSupportSystemAPI;
+
+public class Role : IdentityRole
 {
-    public class Role : IdentityRole
-    {
-        public ICollection<UserRole>? UserRoles { get; }
-    }
+    public ICollection<UserRole>? UserRoles { get; }
 }

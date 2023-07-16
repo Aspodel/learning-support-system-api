@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using LearningSupportSystemAPI.Contract;
-using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.DataObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,13 +10,17 @@ namespace LearningSupportSystemAPI.Controllers
     {
         #region [Fields]
         private readonly IGroupRepository _groupRepository;
+        private readonly IClassRepository _classRepository;
+        private readonly StudentManager _studentManager;
         private readonly IMapper _mapper;
         #endregion
 
         #region [Ctor]
-        public GroupController(IGroupRepository groupRepository, IMapper mapper)
+        public GroupController(IGroupRepository groupRepository, IClassRepository classRepository, StudentManager studentManager, IMapper mapper)
         {
             _groupRepository = groupRepository;
+            _classRepository = classRepository;
+            _studentManager = studentManager;
             _mapper = mapper;
         }
         #endregion
@@ -41,13 +42,38 @@ namespace LearningSupportSystemAPI.Controllers
 
             return Ok(_mapper.Map<GroupDTO>(group));
         }
+
+        [HttpGet("class/{classId}")]
+        public async Task<IActionResult> GetByClass(int classId, CancellationToken cancellationToken = default)
+        {
+            var cla = await _classRepository.FindByIdAsync(classId, cancellationToken);
+            if (cla is null)
+                return NotFound();
+
+            var groups = await _groupRepository.FindAllByClass(classId).ToListAsync(cancellationToken);
+            return Ok(_mapper.Map<IEnumerable<GroupDTO>>(groups));
+        }
         #endregion
 
         #region [POST]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] GroupDTO dto, CancellationToken cancellationToken = default)
+        [HttpPost("class/{classId}")]
+        public async Task<IActionResult> Create(int classId, [FromBody] CreateGroupDTO dto, CancellationToken cancellationToken = default)
         {
+            var cla = await _classRepository.FindByIdAsync(classId, cancellationToken);
+            if (cla is null)
+                return NotFound();
+
             var group = _mapper.Map<Group>(dto);
+            group.Class = cla;
+            group.Students = cla.Students
+                .Where(sc => dto.Students.Contains(sc.StudentId))
+                .ToList();
+
+            // if (group.Students.Count != dto.Students.Count)
+            // {
+            //     return BadRequest("One or more student IDs are invalid.");
+            // }
+
             _groupRepository.Add(group);
             await _groupRepository.SaveChangesAsync(cancellationToken);
 

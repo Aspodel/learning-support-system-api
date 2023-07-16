@@ -1,6 +1,4 @@
-﻿using LearningSupportSystemAPI.Core.Entities;
-using LearningSupportSystemAPI.Models;
-using LearningSupportSystemAPI.Repository;
+﻿using LearningSupportSystemAPI.Models;
 using LearningSupportSystemAPI.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

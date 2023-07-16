@@ -1,20 +1,19 @@
-﻿namespace LearningSupportSystemAPI.Core.Entities
+﻿namespace LearningSupportSystemAPI;
+
+public class Semester : BaseEntity
 {
-    public class Semester : BaseEntity
-    {
-        public SemesterType Type { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public string AcademicYear { get; set; } = string.Empty;
-        public int? ExchangeRate { get; set; }
+    public SemesterType Type { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public string AcademicYear { get; set; } = string.Empty;
+    public int? ExchangeRate { get; set; }
 
-        public ICollection<Class>? Classes { get; set; }
-    }
+    public ICollection<Class>? Classes { get; set; }
+}
 
-    public enum SemesterType
-    {
-        Fall,
-        Spring,
-        Summer
-    }
+public enum SemesterType
+{
+    Fall,
+    Spring,
+    Summer
 }
