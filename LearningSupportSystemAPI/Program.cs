@@ -49,7 +49,8 @@ builder.Services.AddControllersWithViews()
 
 
 #region Connect to Azure App Configuration
-string azureAppConfigConnectionString = configuration.GetConnectionString("AppConfig")!;
+// string azureAppConfigConnectionString = configuration.GetConnectionString("AppConfig")!;
+string azureAppConfigConnectionString = "Endpoint=https://educonfig.azconfig.io;Id=cqJ8-lb-s0:Po2ljSSOYbBMttIz9P9j;Secret=ublhDyQZTRsUbQIwq1KEdL2+A3So3TjFCoJhNmK+AzE=";
 configuration.AddAzureAppConfiguration(azureAppConfigConnectionString);
 #endregion
 
